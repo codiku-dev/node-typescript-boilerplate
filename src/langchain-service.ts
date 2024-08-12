@@ -13,7 +13,7 @@ export class LangChainService {
     console.log('Setup ollama...');
     this.llm = new Ollama({
       model: 'llama3.1:latest',
-      temperature: 0.1,
+      temperature: 0.2,
       maxRetries: 0,
     });
 
@@ -37,30 +37,31 @@ export class LangChainService {
 
     const prompt = new FewShotPromptTemplate({
       examples: EXAMPLES,
-      prefix: `Complete the given partial sentence naturally and coherently. Follow these rules strictly:
+      prefix: `
+      Context:{context}
+
+      Complete the given partial sentence naturally and coherently. Follow these rules strictly:
       1. Only return the missing part of the sentence, starting from where the input ends.
       2. Do not repeat any part of the input.
       3. If your completion starts with a full word, add a space before it.
       4. Ensure the completion fits seamlessly with the given partial sentence.
       6. Never comment on your answer
-      7. Your answer should start with a blank space. `,
+      7. Your answer should start with a blank space.
+      8. Use the added context to complete the sentence.`,
       suffix: 'Partial sentence: {sentence}\nCompletion:',
       examplePrompt,
-      inputVariables: ['sentence'],
+      inputVariables: ['sentence', 'context'],
     });
 
     const formattedPrompt = await prompt.format({
-      context: this.context,
       sentence: partialText,
+      context: this.context,
     });
 
     try {
       const response = await this.llm.invoke(formattedPrompt, { signal });
-      console.log(JSON.stringify(response));
-      // remove 3... from begining, and if the first word contains
-      // const trimmedResponse = this.trimResponse(partialText, response);
-
-      return response;
+      const sanitizedResponse = this.sanitizeResponse(partialText, response);
+      return sanitizedResponse;
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
         console.log('LLM request was aborted');
@@ -72,25 +73,32 @@ export class LangChainService {
   async addContext(newContext: string) {
     this.context += ' ' + newContext;
     await this.memory.saveContext(
-      { input: 'New context added' },
+      {
+        input: `New context added`,
+      },
       { output: newContext },
     );
   }
 
-  private trimResponse(partialText: string, response: string): string {
-    const inputWords = partialText.split(' ');
-    let lastInputWord = inputWords[inputWords.length - 1].toLowerCase();
+  sanitizeResponse(partialText: string, response: string) {
+    const wordsSentence = partialText.split(' ');
+    const wordsResponse = response.split(' ');
+    // Remove the first word of response if it matches the last word of the sentence
+    if (
+      wordsSentence[wordsSentence.length - 1].trim() === wordsResponse[0].trim()
+    ) {
+      const firstWord = wordsResponse.shift() || '';
+      // If the removed word had a leading space, add it to the next word
 
-    // Check if we're completing the last word
-    if (!partialText.endsWith(' ')) {
-      // Remove any repetition of the last partial word
-      const lastWordRegex = new RegExp(`^${lastInputWord}`, 'i');
-      lastInputWord = lastInputWord.replace(lastWordRegex, '');
-
-      // If the trimmed response starts with a space, remove it
-      lastInputWord = lastInputWord.replace(/^\s+/, '');
+      if (
+        firstWord.length !== firstWord.trim().length &&
+        wordsResponse.length > 0
+      ) {
+        wordsResponse[0] = ' ' + wordsResponse[0];
+      }
+      response = wordsResponse.join(' ');
     }
 
-    return lastInputWord;
+    return response;
   }
 }

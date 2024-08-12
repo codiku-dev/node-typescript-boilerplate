@@ -1,0 +1,41 @@
+[a] € (© Rechercher dans KERNL ) forfait Gratuit @  —
+@ KERNL + = 6 ERT © 15) (© ere
+# front-tools Jeudi 4 juillet +
+® 4 general oo gaan
+Accueil A à Kévin /7 15549
+2 CC #TLD Interview Test
+A # kerni-communication + Introduction
+Mesges | # kemifilms-series
+r—1 You have 2 hours to create a small symfony app parsing data from the Github API
+# keml-random You're free to use any solution to run & serve the app (the Symfony PHP Web server, docker + nginx/apache, ..).
+al # kerni-react ## Goals
+Activité # |
+Eos * Create a new Symfony Application
+— © petit-panier * Using this documentation: https://docs.github.com/en/rest/reference/repos#commits, retrieve commits made on the master branch between two dates from the
+i # random Github API on a given repository.
+= w= * Create a controller action matching this pattem /{user)/{repository} which process the data from the Github API to count and list commits made for each calendar
+‘ weeks.
+di Chr * Two optional parameters should be accepted and processed by this route: since and until. Their default values should be 4 weeks ago and today.
+# wespüit * The response of this controller should be a valid JSON response. Here is an example of what this collection could look like:
+# we “json
++ Ajouter des canaux [
+{
++ Messages directs "year": 2017,
+©, Hadrien “week”: 25,
+es
+= "commits": [
+we Matis J/ add here the 5 commit objects retrieved from github
+KV Noémie 1
+& Pavel }
+a Anaïs, Cédric, Pavel ; (AZT
+2 Anais, Guillaume
+JTE * Write functional and/or unit tests
+Rire ## Instructions
+Rob
+= * You can use HTTP Client to perform the HTTP requests to Github or any third-party library you might know.
+Asa * Build your code so that it is easily testable (for example by decoupling the logical part querying Github from the controller code)
+~ Applications
++ @& slackbot
++ Ajouter des applications
+5 +AO®@ C2
+al”:
