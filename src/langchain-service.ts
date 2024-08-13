@@ -1,24 +1,24 @@
 import { Ollama } from '@langchain/ollama';
-import { BufferMemory } from 'langchain/memory';
 import { FewShotPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { EXAMPLES } from './examples.js';
 
 export class LangChainService {
   private static instance: LangChainService;
-
+  private context: string;
   private llm: Ollama;
-  private memory: BufferMemory;
-  private context: string = '';
+  // private memory: BufferMemory;
   constructor() {
     console.log('Setup ollama...');
     this.llm = new Ollama({
       model: 'llama3.1:latest',
       temperature: 0.2,
       maxRetries: 0,
+      maxConcurrency: 1,
+      numThread: 4,
     });
 
     console.log('Setup memory...');
-    this.memory = new BufferMemory();
+    // this.memory = new BufferMemory({ memoryKey: "history" });
   }
   public static getInstance(): LangChainService {
     if (!LangChainService.instance) {
@@ -71,13 +71,14 @@ export class LangChainService {
     }
   }
   async addContext(newContext: string) {
-    this.context += ' ' + newContext;
-    await this.memory.saveContext(
-      {
-        input: `New context added`,
-      },
-      { output: newContext },
-    );
+    this.context +=
+      ' Date of context : ' + new Date().toISOString() + '\n' + newContext;
+    // await this.memory.saveContext(
+    //   {
+    //     input: `New context added`,
+    //   },
+    //   { output: newContext },
+    // );
   }
 
   sanitizeResponse(partialText: string, response: string) {
